@@ -1,4 +1,4 @@
-// node_modules/.deno/itty-router@5.0.17/node_modules/itty-router/Router.mjs
+// node_modules/itty-router/Router.mjs
 var r = ({ base: r2 = "", routes: e = [], ...a } = {}) => ({ __proto__: new Proxy({}, { get: (a2, t, o, c) => (a3, ...l) => e.push([t.toUpperCase?.(), RegExp(`^${(c = (r2 + a3).replace(/\/+(\/|$)/g, "$1")).replace(/(\/?\.?):(\w+)\+/g, "($1(?<$2>*))").replace(/(\/?\.?):(\w+)/g, "($1(?<$2>[^$1/]+?))").replace(/\./g, "\\.").replace(/(\/?)\*/g, "($1.*)?")}/*$`), l, c]) && o }), routes: e, ...a, async fetch(r3, ...t) {
   let o, c, l = new URL(r3.url), p = r3.query = { __proto__: null };
   for (let [r4, e2] of l.searchParams) p[r4] = p[r4] ? [].concat(p[r4], e2) : e2;
@@ -44,7 +44,9 @@ function getToken(headers) {
       };
     }
     const apikey = rawApikey.substring(0, rawApikey.indexOf("#"));
-    const params = new URLSearchParams(rawApikey.substring(rawApikey.indexOf("#") + 1));
+    const params = new URLSearchParams(
+      rawApikey.substring(rawApikey.indexOf("#") + 1)
+    );
     return {
       apikey,
       useBeta: params.has("useBeta")
@@ -73,7 +75,9 @@ function openAiMessageToGeminiMessage(messages) {
         { role: "model", parts: [{ text: "" }] }
       ];
     }
-    const parts = content == null || typeof content === "string" ? [{ text: content?.toString() ?? "" }] : content.map((item) => item.type === "text" ? { text: item.text } : parseBase64(item.image_url.url));
+    const parts = content == null || typeof content === "string" ? [{ text: content?.toString() ?? "" }] : content.map(
+      (item) => item.type === "text" ? { text: item.text } : parseBase64(item.image_url.url)
+    );
     return [{ role: "user" === role ? "user" : "model", parts }];
   }).flatMap((item, idx, arr) => {
     if (item.role === arr.at(idx + 1)?.role && item.role === "user") {
@@ -84,7 +88,7 @@ function openAiMessageToGeminiMessage(messages) {
   return result;
 }
 function genModel(req) {
-  const model = ModelMapping[req.model] ?? "gemini-1.0-pro-latest";
+  const model = ModelMapping[req.model] ?? "gemini-1.5-pro-latest";
   let functions = req.tools?.filter((it) => it.type === "function")?.map((it) => it.function) ?? [];
   functions = functions.concat(req.functions ?? []);
   const responseMimeType = req.response_format?.type === "json_object" ? "application/json" : "text/plain";
@@ -114,12 +118,8 @@ function genModel(req) {
   return [model, generateContentRequest];
 }
 var ModelMapping = {
-  "gpt-3.5-turbo": "gemini-1.0-pro-latest",
-  "gpt-4": "gemini-1.5-pro-latest",
-  "gpt-4o": "gemini-1.5-flash-latest",
-  "gpt-4-vision-preview": "gemini-1.0-pro-vision-latest",
-  "gpt-4-turbo": "gemini-1.5-pro-latest",
-  "gpt-4-turbo-preview": "gemini-1.5-pro-latest"
+  "gemini-1.5-flash-latest": "gemini-1.5-flash-latest",
+  "gemini-1.5-pro-latest": "gemini-1.5-pro-latest"
 };
 function getRuntimeKey() {
   const global = globalThis;
@@ -234,7 +234,7 @@ var Logger = class {
   }
 };
 
-// node_modules/.deno/eventsource-parser@1.1.2/node_modules/eventsource-parser/dist/index.js
+// node_modules/eventsource-parser/dist/index.js
 function createParser(onParse) {
   let isFirstChunk;
   let buffer;
@@ -355,7 +355,7 @@ function hasBom(buffer) {
   return BOM.every((charCode, index) => buffer.charCodeAt(index) === charCode);
 }
 
-// node_modules/.deno/eventsource-parser@1.1.2/node_modules/eventsource-parser/dist/stream.js
+// node_modules/eventsource-parser/dist/stream.js
 var EventSourceParserStream = class extends TransformStream {
   constructor() {
     let parser;

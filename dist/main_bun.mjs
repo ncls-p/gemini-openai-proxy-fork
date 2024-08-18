@@ -1,25 +1,57 @@
-// node_modules/.deno/itty-router@5.0.17/node_modules/itty-router/Router.mjs
-var r = ({ base: r2 = "", routes: e = [], ...a } = {}) => ({ __proto__: new Proxy({}, { get: (a2, t, o, c) => (a3, ...l) => e.push([t.toUpperCase?.(), RegExp(`^${(c = (r2 + a3).replace(/\/+(\/|$)/g, "$1")).replace(/(\/?\.?):(\w+)\+/g, "($1(?<$2>*))").replace(/(\/?\.?):(\w+)/g, "($1(?<$2>[^$1/]+?))").replace(/\./g, "\\.").replace(/(\/?)\*/g, "($1.*)?")}/*$`), l, c]) && o }), routes: e, ...a, async fetch(r3, ...t) {
-  let o, c, l = new URL(r3.url), p = r3.query = { __proto__: null };
-  for (let [r4, e2] of l.searchParams) p[r4] = p[r4] ? [].concat(p[r4], e2) : e2;
-  r: try {
-    for (let e2 of a.before || []) if (null != (o = await e2(r3.proxy ?? r3, ...t))) break r;
-    e: for (let [a2, p2, f, h] of e) if ((a2 == r3.method || "ALL" == a2) && (c = l.pathname.match(p2))) {
-      r3.params = c.groups || {}, r3.route = h;
-      for (let e2 of f) if (null != (o = await e2(r3.proxy ?? r3, ...t))) break e;
+// node_modules/itty-router/Router.mjs
+var r = ({ base: r2 = "", routes: e = [], ...a } = {}) => ({
+  __proto__: new Proxy(
+    {},
+    {
+      get:
+        (a2, t, o, c) =>
+        (a3, ...l) =>
+          e.push([
+            t.toUpperCase?.(),
+            RegExp(
+              `^${(c = (r2 + a3).replace(/\/+(\/|$)/g, "$1"))
+                .replace(/(\/?\.?):(\w+)\+/g, "($1(?<$2>*))")
+                .replace(/(\/?\.?):(\w+)/g, "($1(?<$2>[^$1/]+?))")
+                .replace(/\./g, "\\.")
+                .replace(/(\/?)\*/g, "($1.*)?")}/*$`
+            ),
+            l,
+            c,
+          ]) && o,
     }
-  } catch (e2) {
-    if (!a.catch) throw e2;
-    o = await a.catch(e2, r3.proxy ?? r3, ...t);
-  }
-  try {
-    for (let e2 of a.finally || []) o = await e2(o, r3.proxy ?? r3, ...t) ?? o;
-  } catch (e2) {
-    if (!a.catch) throw e2;
-    o = await a.catch(e2, r3.proxy ?? r3, ...t);
-  }
-  return o;
-} });
+  ),
+  routes: e,
+  ...a,
+  async fetch(r3, ...t) {
+    let o,
+      c,
+      l = new URL(r3.url),
+      p = (r3.query = { __proto__: null });
+    for (let [r4, e2] of l.searchParams)
+      p[r4] = p[r4] ? [].concat(p[r4], e2) : e2;
+    r: try {
+      for (let e2 of a.before || [])
+        if (null != (o = await e2(r3.proxy ?? r3, ...t))) break r;
+      e: for (let [a2, p2, f, h] of e)
+        if ((a2 == r3.method || "ALL" == a2) && (c = l.pathname.match(p2))) {
+          (r3.params = c.groups || {}), (r3.route = h);
+          for (let e2 of f)
+            if (null != (o = await e2(r3.proxy ?? r3, ...t))) break e;
+        }
+    } catch (e2) {
+      if (!a.catch) throw e2;
+      o = await a.catch(e2, r3.proxy ?? r3, ...t);
+    }
+    try {
+      for (let e2 of a.finally || [])
+        o = (await e2(o, r3.proxy ?? r3, ...t)) ?? o;
+    } catch (e2) {
+      if (!a.catch) throw e2;
+      o = await a.catch(e2, r3.proxy ?? r3, ...t);
+    }
+    return o;
+  },
+});
 
 // src/gemini-proxy.ts
 async function geminiProxy(rawReq) {
@@ -40,14 +72,16 @@ function getToken(headers) {
     if (!rawApikey.includes("#")) {
       return {
         apikey: rawApikey,
-        useBeta: false
+        useBeta: false,
       };
     }
     const apikey = rawApikey.substring(0, rawApikey.indexOf("#"));
-    const params = new URLSearchParams(rawApikey.substring(rawApikey.indexOf("#") + 1));
+    const params = new URLSearchParams(
+      rawApikey.substring(rawApikey.indexOf("#") + 1)
+    );
     return {
       apikey,
-      useBeta: params.has("useBeta")
+      useBeta: params.has("useBeta"),
     };
   }
   return null;
@@ -61,65 +95,79 @@ function parseBase64(base64) {
   return {
     inlineData: {
       mimeType,
-      data
-    }
+      data,
+    },
   };
 }
 function openAiMessageToGeminiMessage(messages) {
-  const result = messages.flatMap(({ role, content }) => {
-    if (role === "system") {
-      return [
-        { role: "user", parts: [{ text: content }] },
-        { role: "model", parts: [{ text: "" }] }
-      ];
-    }
-    const parts = content == null || typeof content === "string" ? [{ text: content?.toString() ?? "" }] : content.map((item) => item.type === "text" ? { text: item.text } : parseBase64(item.image_url.url));
-    return [{ role: "user" === role ? "user" : "model", parts }];
-  }).flatMap((item, idx, arr) => {
-    if (item.role === arr.at(idx + 1)?.role && item.role === "user") {
-      return [item, { role: "model", parts: [{ text: "" }] }];
-    }
-    return [item];
-  });
+  const result = messages
+    .flatMap(({ role, content }) => {
+      if (role === "system") {
+        return [
+          { role: "user", parts: [{ text: content }] },
+          { role: "model", parts: [{ text: "" }] },
+        ];
+      }
+      const parts =
+        content == null || typeof content === "string"
+          ? [{ text: content?.toString() ?? "" }]
+          : content.map((item) =>
+              item.type === "text"
+                ? { text: item.text }
+                : parseBase64(item.image_url.url)
+            );
+      return [{ role: "user" === role ? "user" : "model", parts }];
+    })
+    .flatMap((item, idx, arr) => {
+      if (item.role === arr.at(idx + 1)?.role && item.role === "user") {
+        return [item, { role: "model", parts: [{ text: "" }] }];
+      }
+      return [item];
+    });
   return result;
 }
 function genModel(req) {
-  const model = ModelMapping[req.model] ?? "gemini-1.0-pro-latest";
-  let functions = req.tools?.filter((it) => it.type === "function")?.map((it) => it.function) ?? [];
+  const model = ModelMapping[req.model] ?? "gemini-1.5-pro-latest";
+  let functions =
+    req.tools
+      ?.filter((it) => it.type === "function")
+      ?.map((it) => it.function) ?? [];
   functions = functions.concat(req.functions ?? []);
-  const responseMimeType = req.response_format?.type === "json_object" ? "application/json" : "text/plain";
+  const responseMimeType =
+    req.response_format?.type === "json_object"
+      ? "application/json"
+      : "text/plain";
   const generateContentRequest = {
     contents: openAiMessageToGeminiMessage(req.messages),
     generationConfig: {
       maxOutputTokens: req.max_tokens ?? void 0,
       temperature: req.temperature ?? void 0,
       topP: req.top_p ?? void 0,
-      responseMimeType
+      responseMimeType,
     },
-    tools: functions.length === 0 ? void 0 : [
-      {
-        functionDeclarations: functions
-      }
-    ],
+    tools:
+      functions.length === 0
+        ? void 0
+        : [
+            {
+              functionDeclarations: functions,
+            },
+          ],
     safetySettings: [
       "HARM_CATEGORY_HATE_SPEECH",
       "HARM_CATEGORY_SEXUALLY_EXPLICIT",
       "HARM_CATEGORY_DANGEROUS_CONTENT",
-      "HARM_CATEGORY_HARASSMENT"
+      "HARM_CATEGORY_HARASSMENT",
     ].map((category) => ({
       category,
-      threshold: "BLOCK_NONE"
-    }))
+      threshold: "BLOCK_NONE",
+    })),
   };
   return [model, generateContentRequest];
 }
 var ModelMapping = {
-  "gpt-3.5-turbo": "gemini-1.0-pro-latest",
-  "gpt-4": "gemini-1.5-pro-latest",
-  "gpt-4o": "gemini-1.5-flash-latest",
-  "gpt-4-vision-preview": "gemini-1.0-pro-vision-latest",
-  "gpt-4-turbo": "gemini-1.5-pro-latest",
-  "gpt-4-turbo-preview": "gemini-1.5-pro-latest"
+  "gemini-1.5-flash-latest": "gemini-1.5-flash-latest",
+  "gemini-1.5-pro-latest": "gemini-1.5-pro-latest",
 };
 function getRuntimeKey() {
   const global = globalThis;
@@ -165,13 +213,22 @@ function hello(req) {
 
 // src/itty-router/cors.ts
 function cors(options = {}) {
-  const { origin = "*", credentials = false, allowMethods = "*", allowHeaders, exposeHeaders, maxAge } = options;
+  const {
+    origin = "*",
+    credentials = false,
+    allowMethods = "*",
+    allowHeaders,
+    exposeHeaders,
+    maxAge,
+  } = options;
   const getAccessControlOrigin = (request) => {
     const requestOrigin = request?.headers.get("origin");
     if (!requestOrigin) return void 0;
     if (origin === true) return requestOrigin;
-    if (origin instanceof RegExp) return origin.test(requestOrigin) ? requestOrigin : void 0;
-    if (Array.isArray(origin)) return origin.includes(requestOrigin) ? requestOrigin : void 0;
+    if (origin instanceof RegExp)
+      return origin.test(requestOrigin) ? requestOrigin : void 0;
+    if (Array.isArray(origin))
+      return origin.includes(requestOrigin) ? requestOrigin : void 0;
     if (origin instanceof Function) return origin(requestOrigin);
     return origin === "*" && credentials ? requestOrigin : origin;
   };
@@ -190,18 +247,25 @@ function cors(options = {}) {
         // include allowed methods
         "access-control-expose-headers": [exposeHeaders].flat().join(","),
         // include allowed headers
-        "access-control-allow-headers": [allowHeaders].flat().join?.(",") || request.headers.get("access-control-request-headers") || "",
+        "access-control-allow-headers":
+          [allowHeaders].flat().join?.(",") ||
+          request.headers.get("access-control-request-headers") ||
+          "",
         // include allowed headers
         "access-control-max-age": maxAge?.toString(),
-        "access-control-allow-credentials": credentials.toString()
+        "access-control-allow-credentials": credentials.toString(),
       });
     }
   };
   const corsify2 = (response, request) => {
-    if (response?.headers?.get("access-control-allow-origin") || response.status === 101) return response;
+    if (
+      response?.headers?.get("access-control-allow-origin") ||
+      response.status === 101
+    )
+      return response;
     return appendHeadersAndReturn(response, {
       "access-control-allow-origin": getAccessControlOrigin(request),
-      "access-control-allow-credentials": credentials.toString()
+      "access-control-allow-credentials": credentials.toString(),
     });
   };
   return { corsify: corsify2, preflight: preflight2 };
@@ -219,7 +283,7 @@ var Logger = class {
     const level = LEVEL.find((it) => it === config?.level) ?? "warn";
     this.config = {
       prefix: config?.prefix ?? "",
-      level
+      level,
     };
     for (const m of LEVEL) {
       this[m] = (...data) => this.#write(m, ...data);
@@ -230,11 +294,16 @@ var Logger = class {
     if (LEVEL.indexOf(level) < LEVEL.indexOf(configLevel)) {
       return;
     }
-    console[level](`${(/* @__PURE__ */ new Date()).toISOString()} ${level.toUpperCase()}${prefix ? ` ${prefix}` : ""}`, ...data);
+    console[level](
+      `${/* @__PURE__ */ new Date().toISOString()} ${level.toUpperCase()}${
+        prefix ? ` ${prefix}` : ""
+      }`,
+      ...data
+    );
   }
 };
 
-// node_modules/.deno/eventsource-parser@1.1.2/node_modules/eventsource-parser/dist/index.js
+// node_modules/eventsource-parser/dist/index.js
 function createParser(onParse) {
   let isFirstChunk;
   let buffer;
@@ -246,7 +315,7 @@ function createParser(onParse) {
   reset();
   return {
     feed,
-    reset
+    reset,
   };
   function reset() {
     isFirstChunk = true;
@@ -276,7 +345,11 @@ function createParser(onParse) {
       let lineLength = -1;
       let fieldLength = startingFieldLength;
       let character;
-      for (let index = startingPosition; lineLength < 0 && index < length; ++index) {
+      for (
+        let index = startingPosition;
+        lineLength < 0 && index < length;
+        ++index
+      ) {
         character = buffer[index];
         if (character === ":" && fieldLength < 0) {
           fieldLength = index - position;
@@ -311,7 +384,7 @@ function createParser(onParse) {
           type: "event",
           id: eventId,
           event: eventName || void 0,
-          data: data.slice(0, -1)
+          data: data.slice(0, -1),
           // remove trailing newline
         });
         data = "";
@@ -321,7 +394,10 @@ function createParser(onParse) {
       return;
     }
     const noValue = fieldLength < 0;
-    const field = lineBuffer.slice(index, index + (noValue ? lineLength : fieldLength));
+    const field = lineBuffer.slice(
+      index,
+      index + (noValue ? lineLength : fieldLength)
+    );
     let step = 0;
     if (noValue) {
       step = lineLength;
@@ -344,7 +420,7 @@ function createParser(onParse) {
       if (!Number.isNaN(retry)) {
         onParse({
           type: "reconnect-interval",
-          value: retry
+          value: retry,
         });
       }
     }
@@ -355,7 +431,7 @@ function hasBom(buffer) {
   return BOM.every((charCode, index) => buffer.charCodeAt(index) === charCode);
 }
 
-// node_modules/.deno/eventsource-parser@1.1.2/node_modules/eventsource-parser/dist/stream.js
+// node_modules/eventsource-parser/dist/stream.js
 var EventSourceParserStream = class extends TransformStream {
   constructor() {
     let parser;
@@ -369,7 +445,7 @@ var EventSourceParserStream = class extends TransformStream {
       },
       transform(chunk) {
         parser.feed(chunk);
-      }
+      },
     });
   }
 };
@@ -390,12 +466,18 @@ var GoogleGenerativeAIResponseError = class extends GoogleGenerativeAIError {
 // src/gemini-api-client/gemini-api-client.ts
 async function* generateContent(task, apiParam, model, params, requestOptions) {
   const url = new RequestUrl(model, task, true, apiParam);
-  const response = await makeRequest(url, JSON.stringify(params), requestOptions);
+  const response = await makeRequest(
+    url,
+    JSON.stringify(params),
+    requestOptions
+  );
   const body = response.body;
   if (body == null) {
     return;
   }
-  for await (const event of body.pipeThrough(new TextDecoderStream()).pipeThrough(new EventSourceParserStream())) {
+  for await (const event of body
+    .pipeThrough(new TextDecoderStream())
+    .pipeThrough(new EventSourceParserStream())) {
     const responseJson = JSON.parse(event.data);
     yield responseJson;
   }
@@ -407,9 +489,9 @@ async function makeRequest(url, body, requestOptions) {
       ...buildFetchOptions(requestOptions),
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body
+      body,
     });
     if (!response.ok) {
       let message = "";
@@ -419,13 +501,14 @@ async function makeRequest(url, body, requestOptions) {
         if (errResp.error.details) {
           message += ` ${JSON.stringify(errResp.error.details)}`;
         }
-      } catch (_e) {
-      }
+      } catch (_e) {}
       throw new Error(`[${response.status} ${response.statusText}] ${message}`);
     }
   } catch (e) {
     console.log(e);
-    const err = new GoogleGenerativeAIError(`Error fetching from google -> ${e.message}`);
+    const err = new GoogleGenerativeAIError(
+      `Error fetching from google -> ${e.message}`
+    );
     err.stack = e.stack;
     throw err;
   }
@@ -440,7 +523,9 @@ var RequestUrl = class {
   }
   toURL() {
     const api_version = "v1beta";
-    const url = new URL(`${BASE_URL}/${api_version}/models/${this.model}:${this.task}`);
+    const url = new URL(
+      `${BASE_URL}/${api_version}/models/${this.model}:${this.task}`
+    );
     url.searchParams.append("key", this.apiParam.apikey);
     if (this.stream) {
       url.searchParams.append("alt", "sse");
@@ -495,11 +580,17 @@ function getText(response) {
 }
 var badFinishReasons = ["RECITATION", "SAFETY"];
 function hadBadFinishReason(candidate) {
-  return !!candidate.finishReason && badFinishReasons.includes(candidate.finishReason);
+  return (
+    !!candidate.finishReason &&
+    badFinishReasons.includes(candidate.finishReason)
+  );
 }
 function formatBlockErrorMessage(response) {
   let message = "";
-  if ((!response.candidates || response.candidates.length === 0) && response.promptFeedback) {
+  if (
+    (!response.candidates || response.candidates.length === 0) &&
+    response.promptFeedback
+  ) {
     message += "Response was blocked";
     if (response.promptFeedback?.blockReason) {
       message += ` due to ${response.promptFeedback.blockReason}`;
@@ -524,7 +615,12 @@ async function nonStreamingChatProxyHandler(req, apiParam, log) {
   const [model, geminiReq] = genModel(req);
   let geminiResp = "";
   try {
-    for await (const it of generateContent("streamGenerateContent", apiParam, model, geminiReq)) {
+    for await (const it of generateContent(
+      "streamGenerateContent",
+      apiParam,
+      model,
+      geminiReq
+    )) {
       const data = resultHelper(it);
       if (typeof data === "string") {
         geminiResp += data;
@@ -552,9 +648,9 @@ async function nonStreamingChatProxyHandler(req, apiParam, log) {
             message: { role: "assistant", content },
             finish_reason: "stop",
             index: 0,
-            logprobs: null
-          }
-        ]
+            logprobs: null,
+          },
+        ],
       };
     }
     return {
@@ -569,14 +665,14 @@ async function nonStreamingChatProxyHandler(req, apiParam, log) {
             content: null,
             function_call: {
               name: content.name ?? "",
-              arguments: JSON.stringify(content.args)
-            }
+              arguments: JSON.stringify(content.args),
+            },
           },
           finish_reason: "function_call",
           index: 0,
-          logprobs: null
-        }
-      ]
+          logprobs: null,
+        },
+      ],
     };
   }
   return Response.json(genOpenAiResp(geminiResp));
@@ -587,27 +683,32 @@ function streamingChatProxyHandler(req, apiParam, log) {
   const [model, geminiReq] = genModel(req);
   log?.debug("streamGenerateContent request", req);
   return sseResponse(
-    async function* () {
+    (async function* () {
       try {
-        for await (const it of generateContent("streamGenerateContent", apiParam, model, geminiReq)) {
+        for await (const it of generateContent(
+          "streamGenerateContent",
+          apiParam,
+          model,
+          geminiReq
+        )) {
           log?.debug("streamGenerateContent resp", it);
           const data = resultHelper(it);
           yield genStreamResp({ model: req.model, content: data, stop: false });
         }
       } catch (error) {
-        yield genStreamResp({ model: req.model, content: error?.message ?? error.toString(), stop: true });
+        yield genStreamResp({
+          model: req.model,
+          content: error?.message ?? error.toString(),
+          stop: true,
+        });
       }
       yield genStreamResp({ model: req.model, content: "", stop: true });
       yield "[DONE]";
       return void 0;
-    }()
+    })()
   );
 }
-function genStreamResp({
-  model,
-  content,
-  stop
-}) {
+function genStreamResp({ model, content, stop }) {
   if (typeof content === "string") {
     return {
       id: "chatcmpl-abc123",
@@ -618,9 +719,9 @@ function genStreamResp({
         {
           delta: { role: "assistant", content },
           finish_reason: stop ? "stop" : null,
-          index: 0
-        }
-      ]
+          index: 0,
+        },
+      ],
     };
   }
   return {
@@ -632,9 +733,9 @@ function genStreamResp({
       {
         delta: { role: "assistant", function_call: content },
         finish_reason: stop ? "function_call" : null,
-        index: 0
-      }
-    ]
+        index: 0,
+      },
+    ],
   };
 }
 var encoder = new TextEncoder();
@@ -648,13 +749,13 @@ function sseResponse(dataStream) {
         const data = typeof value === "string" ? value : JSON.stringify(value);
         controller.enqueue(encoder.encode(toSseMsg({ data })));
       }
-    }
+    },
   });
   const response = new Response(s, {
     status: 200,
     headers: new Headers({
-      "Content-Type": "text/event-stream"
-    })
+      "Content-Type": "text/event-stream",
+    }),
   });
   return response;
 }
@@ -700,13 +801,18 @@ async function embeddingProxyHandler(rawReq) {
   const embedContentRequest = {
     model: "models/text-embedding-004",
     content: {
-      parts: [req.input].flat().map((it) => ({ text: it.toString() }))
-    }
+      parts: [req.input].flat().map((it) => ({ text: it.toString() })),
+    },
   };
   log?.warn("request", embedContentRequest);
   let geminiResp = [];
   try {
-    for await (const it of generateContent("embedContent", apiParam, "text-embedding-004", embedContentRequest)) {
+    for await (const it of generateContent(
+      "embedContent",
+      apiParam,
+      "text-embedding-004",
+      embedContentRequest
+    )) {
       const data = it.embedding?.values;
       geminiResp = data;
       break;
@@ -724,14 +830,14 @@ async function embeddingProxyHandler(rawReq) {
       {
         object: "embedding",
         index: 0,
-        embedding: geminiResp ?? []
-      }
+        embedding: geminiResp ?? [],
+      },
     ],
     model: req.model,
     usage: {
       prompt_tokens: 5,
-      total_tokens: 5
-    }
+      total_tokens: 5,
+    },
   };
   return Response.json(resp);
 }
@@ -741,12 +847,12 @@ var modelData = Object.keys(ModelMapping).map((model) => ({
   created: 1677610602,
   object: "model",
   owned_by: "openai",
-  id: model
+  id: model,
 }));
 var models = () => {
   return {
     object: "list",
-    data: modelData
+    data: modelData,
   };
 };
 var modelDetail = (model) => {
@@ -761,14 +867,14 @@ var app = r({
     (req) => {
       req.logger = new Logger({ prefix: crypto.randomUUID().toString() });
       req.logger.warn(`--> ${req.method} ${req.url}`);
-    }
+    },
   ],
   finally: [
     corsify,
     (_, req) => {
       req.logger?.warn(`<-- ${req.method} ${req.url}`);
-    }
-  ]
+    },
+  ],
 });
 app.get("/", hello);
 app.post("/v1/chat/completions", chatProxyHandler);
@@ -779,8 +885,8 @@ app.post(":model_version/models/:model_and_action", geminiProxy);
 app.all("*", () => new Response("Page Not Found", { status: 404 }));
 
 // main_bun.ts
-console.log("Listening on http://localhost:8000/");
+console.log("Listening on http://localhost:8080/");
 Bun.serve({
   port: 8e3,
-  fetch: app.fetch
+  fetch: app.fetch,
 });

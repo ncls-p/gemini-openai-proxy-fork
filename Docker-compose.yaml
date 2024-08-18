@@ -1,0 +1,34 @@
+version: "3.9"
+services:
+  gemini:
+    container_name: gemini-proxy
+    build:
+      context: .
+      dockerfile: docker/node.Dockerfile
+    restart: unless-stopped
+    networks:
+      - vpn_net
+    depends_on:
+      - vpn
+
+  vpn:
+    image: ghcr.io/bubuntux/nordvpn
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    environment:
+      - TOKEN=GEMINI_TOKEN
+      - CONNECT=United_States
+      - TECHNOLOGY=NordLynx
+      - NETWORK=10.8.0.0/24
+    ports:
+      - 8080:8080
+    networks:
+      - vpn_net
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=1
+
+networks:
+  vpn_net:
+    driver: bridge

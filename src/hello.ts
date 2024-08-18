@@ -1,7 +1,7 @@
-import { getRuntimeKey } from "./utils.ts"
+import { getRuntimeKey } from "./utils.ts";
 
 export function hello(req: Request): Response {
-  const origin = new URL(req.url).origin
+  const origin = new URL(req.url).origin;
   return new Response(`
     Hello Gemini-OpenAI-Proxy from ${getRuntimeKey()}!
 
@@ -11,9 +11,9 @@ export function hello(req: Request): Response {
     -H "Authorization: Bearer $YOUR_GEMINI_API_KEY" \\
     -H "Content-Type: application/json" \\
     -d '{
-        "model": "gpt-3.5-turbo",
+        "model": "gemini-1.5-flash-latest",
         "messages": [{"role": "user", "content": "Hello"}],
         "temperature": 0.7
     }'
-    `)
+    `);
 }
